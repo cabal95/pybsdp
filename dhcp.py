@@ -25,7 +25,7 @@ MESSAGE_NAK = 6
 MESSAGE_RELEASE = 7
 MESSAGE_INFORM = 8
 
-OPTION_ROOT_PATH = 17,
+OPTION_ROOT_PATH = 17
 OPTION_VENDOR_INFORMATION = 43
 OPTION_MESSAGE_TYPE = 53
 OPTION_SERVER_IDENTIFIER = 54
@@ -207,11 +207,10 @@ class DhcpPacket:
         opts = data[240:]
         self.options = { }
         while len(opts):
-            vals = struct.unpack('=BB', opts[0:2])
-            code = vals[0]
-            length = vals[1]
-            if vals[0] == 255:
+            code = struct.unpack('=B', opts[0:1])[0]
+            if code == 255:
                 break
+            length = struct.unpack('=B', opts[1:2])[0]
             if code in DHCP_TYPES:
                 fmt = DHCP_TYPES[code]
             else:

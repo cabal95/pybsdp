@@ -16,6 +16,9 @@ CODE_DEFAULT_BOOT_IMAGE = 7
 CODE_SELECTED_BOOT_IMAGE = 8
 CODE_BOOT_IMAGE_LIST = 9
 CODE_MAX_MESSAGE_SIZE = 12
+CODE_SHADOW_MOUNT_URL = 128
+CODE_SHADOW_FILE_PATH = 129
+CODE_MACHINE_NAME = 130
 
 BSDP_TYPES = {
     CODE_TYPE: 'int8',
@@ -27,6 +30,9 @@ BSDP_TYPES = {
     CODE_SELECTED_BOOT_IMAGE: 'int32',
     CODE_BOOT_IMAGE_LIST: '*oct',
     CODE_MAX_MESSAGE_SIZE: 'int16',
+    CODE_SHADOW_MOUNT_URL: 'string',
+    CODE_SHADOW_FILE_PATH: 'string',
+    CODE_MACHINE_NAME: 'string',
 }
 
 class BsdpPacket:
@@ -107,6 +113,7 @@ class BsdpPacket:
 
     #
     # Server id.
+    # IP Address of BSDP server.
     #
     def setServerID(self, value):
         self.options[CODE_SERVER_ID] = value
@@ -119,6 +126,7 @@ class BsdpPacket:
 
     #
     # Server priority.
+    # Priority of server over others on the network.
     #
     def setServerPriority(self, value):
         self.options[CODE_SERVER_PRIORITY] = value
@@ -131,6 +139,7 @@ class BsdpPacket:
 
     #
     # Reply port.
+    # Port the client is listening on.
     #
     def setReplyPort(self, value):
         self.options[CODE_REPLY_PORT] = value
@@ -174,6 +183,45 @@ class BsdpPacket:
     def getMaxMessageSize(self):
         if CODE_MAX_MESSAGE_SIZE in self.options:
             return self.options[CODE_MAX_MESSAGE_SIZE]
+
+        return None
+
+    #
+    # Shadow Mount URL
+    # afp://[username:password@]server/SharePoint
+    #
+    def setShadowMountURL(self, value):
+        self.options[CODE_SHADOW_MOUNT_URL] = value
+
+    def getShadowMountURL(self):
+        if CODE_SHADOW_MOUNT_URL in self.options:
+            return self.options[CODE_SHADOW_MOUNT_URL]
+
+        return None
+
+    #
+    # Shadow File Path
+    # Directory/Filename
+    #
+    def setShadowFilePath(self, value):
+        self.options[CODE_SHADOW_FILE_PATH] = value
+
+    def getShadowFilePath(self):
+        if CODE_SHADOW_FILE_PATH in self.options:
+            return self.options[CODE_SHADOW_FILE_PATH]
+
+        return None
+
+    #
+    # Machine Name
+    # Network name of the machine for sharing purposes.
+    #
+    def setMachineName(self, value):
+        self.options[CODE_MACHINE_NAME] = value
+
+    def getMachineName(self):
+        if CODE_MACHINE_NAME in self.options:
+            return self.options[CODE_MACHINE_NAME]
 
         return None
 
