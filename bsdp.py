@@ -71,9 +71,12 @@ class BsdpPacket:
             data = data[2+length:]
 
     #
-    # Encode the packet into a data stream.
+    # Encode the packet into a data stream. If the unpack parameter is
+    # True then the data is unpacked into an array of integers that
+    # each represent a byte of the data, useful for then storing in a
+    # DHCP packet.
     #
-    def encode(self):
+    def encode(self, unpack = False):
         data = ''
         for opt in self.options:
             if opt in BSDP_TYPES:
@@ -85,7 +88,10 @@ class BsdpPacket:
             data += struct.pack('=BB', opt, len(dat))
             data += dat
 
-        return data
+        if pack:
+            return struct.unpack(str(len(data)) + 'B', data)
+        else:
+            return data
 
     #
     # Message type.
