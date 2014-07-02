@@ -1,0 +1,11 @@
+# pybsdpd - Python BSDPD job file
+
+description "BSDP NetBoot Service"
+author "Daniel Hazelbaker <danielhazelbaker@gmail.com>"
+
+start on runlevel [2345]
+stop on runlevel [!2345]
+
+respawn
+
+exec /usr/local/sbin/pybsdp.py

@@ -1,13 +1,18 @@
+#!/usr/bin/python
 from os import listdir, mkdir, chown
 from os.path import isdir, join
 from pwd import getpwnam
-from interfaces import all_interfaces
 import plistlib
 import socket
 import select
 import struct
+import sys
+import ConfigParser
+
+sys.path.append('/usr/local/lib/pybsdp')
 import dhcp
 import bsdp
+from interfaces import all_interfaces
 
 
 #
@@ -175,12 +180,14 @@ def handleImageSelect(ip, dpacket, bpacket):
 
 
 #
-# Begin main processing.
+# Begin main.
 #
-netbootimagepath = '/netboot/Images'
-netbootclientpath = '/netboot/Clients'
-netbootuser = 'netboot'
-netbootpass = 'appleNB'
+config = ConfigParser.RawConfigParser()
+config.read('/etc/pybsdp.conf')
+netbootimagepath = config.get('pybsdp', 'imagepath')
+netbootclientpath = config.get('pybsdp', 'clientpath')
+netbootuser = config.get('pybsdp', 'netbootuser')
+netbootpass = config.get('pybsdp', 'netbootpass')
 
 #
 # Listen for all DHCP packets.
