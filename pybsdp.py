@@ -59,19 +59,16 @@ def imageList(path):
 #
 def handleDhcpPacket(sock, ip, dpacket):
     if dpacket.options[dhcp.OPTION_MESSAGE_TYPE] == dhcp.MESSAGE_INFORM and dpacket.options[dhcp.OPTION_VENDOR_CLASS][0:9] == 'AAPLBSDPC':
-        print 'INFORM'
-
         bpacket = bsdp.BsdpPacket()
         bpacket.decode(dpacket.options[dhcp.OPTION_VENDOR_INFORMATION])
+
         if bpacket.getType() == bsdp.TYPE_LIST:
             response = handleImageList(ip, dpacket, bpacket)
             if response != None:
-                print 'Sending response to', addr
                 sock.sendto(response.encode(), addr)
         elif bpacket.getType() == bsdp.TYPE_SELECT:
             response = handleImageSelect(ip, dpacket, bpacket)
             if response != None:
-                print 'Sending response to', addr
                 sock.sendto(response.encode(), addr)
 
 
@@ -79,8 +76,6 @@ def handleDhcpPacket(sock, ip, dpacket):
 # Handle a DHCP/BSDP packet LIST command.
 #
 def handleImageList(ip, dpacket, bpacket):
-    print 'List Images'
-
     #
     # Build the basic packet.
     #
@@ -129,8 +124,6 @@ def handleImageList(ip, dpacket, bpacket):
 # Handle a DHCP/BSDP packet SELECT command.
 #
 def handleImageSelect(ip, dpacket, bpacket):
-    print 'Select Image'
-
     #
     # Find the boot image the user selected.
     #
@@ -145,17 +138,20 @@ def handleImageSelect(ip, dpacket, bpacket):
     #
     # Build the DHCP Ack packet.
     #
-    dresponse = packet.newAckPacket()
+    dresponse = dpacket.newAckPacket()
     dresponse.options[dhcp.OPTION_VENDOR_CLASS] = 'AAPLBSDPC'
     dresponse.options[dhcp.OPTION_SERVER_IDENTIFIER] = ip
     dresponse.options[dhcp.OPTION_TFTP_SERVER_NAME] = ip
     dresponse.options[dhcp.OPTION_BOOTFILE_NAME] = bootimage['Path'] + '/i386/booter'
-    dresponse.options[dhcp.OPTION_ROOT_PATH] = 'nfs:' + ip + ':' + netbootimagepath + ':' + bootimage['Path'].replace(' ', '%20') + '/' + bootimage['RootPath'].replace(' ', '%20')
+    if image['Type'] == 'NFS':
+        dresponse.options[dhcp.OPTION_ROOT_PATH] = 'nfs:' + ip + ':' + netbootimagepath + ':' + bootimage['Path'] + '/' + bootimage['RootPath']
+    else:
+        dresponse.options[dhcp.OPTION_ROOT_PATH] = 'http://' + ip + '/' + bootimage['Path'].replace(' ', '%20') + '/' + bootimage['RootPath'].replace(' ', '%20')
 
     #
     # Machine name will follow the pattern of: NetBootMAC
     #
-    name = 'NetBoot' + ''.join('{:02x}'.format(c) for c in packet.chaddr)
+    name = 'NetBoot' + ''.join('{:02x}'.format(c) for c in dpacket.chaddr)
     bresponse = bsdp.BsdpPacket()
     bresponse.setType(2)
     bresponse.setMachineName(name)
@@ -214,7 +210,7 @@ while True:
         #
         # If this packet did not come from a valid IP address, ignore.
         #
-        if addr[0] == '0.0.0.0' or addr[0].split('.') != 4:
+        if addr[0] == '0.0.0.0' or len(addr[0].split('.')) != 4:
             continue
 
         #
