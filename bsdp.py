@@ -88,7 +88,7 @@ class BsdpPacket:
             data += struct.pack('=BB', opt, len(dat))
             data += dat
 
-        if pack:
+        if unpack:
             return struct.unpack(str(len(data)) + 'B', data)
         else:
             return data
